@@ -2,12 +2,14 @@
 import { ref, computed, inject, onMounted, type Ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useVehiculosStore, type EstadoVehiculo } from '@/stores/vehiculos'
+import { useClientesStore } from '@/stores/clientes'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppTopbar from '@/components/layout/AppTopbar.vue'
 
 const router = useRouter()
 const route = useRoute()
 const store = useVehiculosStore()
+const cliStore = useClientesStore()
 
 const collapsed = inject<Ref<boolean>>('sidebarCollapsed')!
 const darkMode = inject<Ref<boolean>>('darkMode')!
@@ -34,13 +36,13 @@ const form = ref({
 
 const errores = ref<Record<string, string>>({})
 
-const clientes = [
-  { nombre: 'Carlos Ramirez', telefono: '555-123-4567', email: 'carlos@email.com' },
-  { nombre: 'Maria Lopez', telefono: '555-987-6543', email: 'maria@email.com' },
-  { nombre: 'Ana Garcia', telefono: '555-456-7890', email: 'ana@email.com' },
-  { nombre: 'Jose Martinez', telefono: '555-321-0987', email: 'jose@email.com' },
-  { nombre: 'Pedro Sanchez', telefono: '555-789-0123', email: 'pedro@email.com' },
-]
+const clientes = computed(() =>
+  cliStore.clientes.map((c) => ({
+    nombre: c.nombre,
+    telefono: c.telefono,
+    email: c.email,
+  })),
+)
 
 const marcas = [
   'Toyota',
@@ -63,7 +65,7 @@ const estados: { valor: EstadoVehiculo; label: string }[] = [
 ]
 
 function seleccionarCliente(nombre: string) {
-  const c = clientes.find((x) => x.nombre === nombre)
+  const c = clientes.value.find((x) => x.nombre === nombre)
   if (c) {
     form.value.clienteNombre = c.nombre
     form.value.clienteTelefono = c.telefono
